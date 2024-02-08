@@ -354,7 +354,7 @@ async def get_all_data(urls: list[str]):
 
 
 def get_pages_urls(pagination: int) -> list[str]:
-    pagination = 5
+    # pagination = 5
     urls = []
     for page in range(1, pagination + 1):
         url = URL + f"?page={page}&limit=100"
