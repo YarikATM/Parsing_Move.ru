@@ -105,7 +105,7 @@ def parse_phones():
 
     list = os.listdir("raw_json")
 
-    for json in list[:1]:
+    for json in list:
         res = parse(json)
         if res is None:
             return
