@@ -14,17 +14,17 @@ from config import URL, PROXIES, HEADERS
 
 rnd = random.Random()
 
-locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 
 if not os.path.isdir("raw_json"):
     os.mkdir("raw_json")
 
 
 
-
-
 def normalize_time(publication_date: str):
-
+    publication_date = publication_date.replace("декабря", "12").replace("октября", "10").replace("февраля", "2")\
+        .replace("января", "1").replace("марта", "3").replace("апреля", "4").replace("мая", "5")\
+        .replace("июня", "6").replace("июля", "7").replace("августа", "8").replace("сентября", "9")\
+        .replace("ноября", "11")
     if "сегодня в" in publication_date:
 
         publication_date = publication_date.replace("сегодня в ", "2024-01-30T") + ":00Z"
@@ -36,13 +36,13 @@ def normalize_time(publication_date: str):
             or "2023" in publication_date or "2020" in publication_date or "2018" in publication_date \
             or "2017" in publication_date:
         # print(publication_date)
-        publication_date = datetime.datetime.strptime(publication_date, "%d %B %Y")
+        publication_date = datetime.datetime.strptime(publication_date, "%d %m %Y")
         publication_date = str(publication_date).replace(" ", "T") + "Z"
 
         # print(publication_date)
     else:
         # print(publication_date)
-        publication_date = datetime.datetime.strptime(publication_date, "%d %B")
+        publication_date = datetime.datetime.strptime(publication_date, "%d %m")
         publication_date = str(publication_date).replace(" ", "T").replace("1900", "2024") + "Z"
         # print(publication_date)
         pass
@@ -81,7 +81,9 @@ async def get_page(session: aiohttp.ClientSession, url):
 
 
         try:
-            async with session.get(url=url, headers=HEADERS, ssl=False) as response:
+            async with session.get(url=url, headers=HEADERS,
+                                   # proxy=current_proxy,
+                                   ssl=False) as response:
 
                 data = await response.text()
                 assert response.status == 200
@@ -352,6 +354,7 @@ async def get_all_data(urls: list[str]):
 
 
 def get_pages_urls(pagination: int) -> list[str]:
+    pagination = 5
     urls = []
     for page in range(1, pagination + 1):
         url = URL + f"?page={page}&limit=100"
