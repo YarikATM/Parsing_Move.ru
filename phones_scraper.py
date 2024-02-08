@@ -8,7 +8,8 @@ from bs4 import BeautifulSoup
 from config import PROXIES, HEADERS, POST_HEADERS
 import requests
 import random
-
+from fake_useragent import UserAgent
+ua = UserAgent()
 rnd = random.Random()
 
 
@@ -49,7 +50,8 @@ def parse(name):
                 return
             proxy_num = rnd.randint(0, len(PROXY_LIST) - 1)
             current_proxy = PROXY_LIST[proxy_num]
-
+            HEADERS["user-agent"] = ua.random
+            POST_HEADERS["user-agent"] = HEADERS["user-agent"]
             proxy = {
                 "https": "http://" + current_proxy,
                 "http": "http://" + current_proxy

@@ -11,7 +11,8 @@ import os, os.path
 import locale
 from phones_scraper import parse_phones
 from config import URL, PROXIES, HEADERS
-
+from fake_useragent import UserAgent
+ua = UserAgent()
 rnd = random.Random()
 
 
@@ -78,7 +79,7 @@ async def get_page(session: aiohttp.ClientSession, url):
 
         rand = rnd.randint(0, len(PROXIES) - 1)
         current_proxy = "http://" + PROXIES[rand]
-
+        HEADERS["user-agent"] = ua.random
 
         try:
             async with session.get(url=url, headers=HEADERS,

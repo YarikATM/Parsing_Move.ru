@@ -3,3 +3,4 @@ requests~=2.31.0
 beautifulsoup4==4.12.2
 aiohttp==3.8.5
 validators~=0.22.0
+fake-useragent
