@@ -79,7 +79,7 @@ async def get_page(session: aiohttp.ClientSession, url):
 
         rand = rnd.randint(0, len(PROXIES) - 1)
         current_proxy = "http://" + PROXIES[rand]
-        HEADERS["user-agent"] = ua.random
+        # HEADERS["user-agent"] = ua.random
 
         try:
             async with session.get(url=url, headers=HEADERS,
