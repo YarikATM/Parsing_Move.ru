@@ -12,6 +12,7 @@ import locale
 from phones_scraper import parse_phones
 from config import URL, PROXIES, HEADERS
 
+rnd = random.Random()
 
 locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 
@@ -75,16 +76,16 @@ async def load_page(urls: list):
 async def get_page(session: aiohttp.ClientSession, url):
     while True:
 
-        rnd = random.Random()
         rand = rnd.randint(0, len(PROXIES) - 1)
         current_proxy = "http://" + PROXIES[rand]
 
 
         try:
-            async with session.get(url=url, headers=HEADERS, proxy=current_proxy, ssl=False) as response:
+            async with session.get(url=url, headers=HEADERS, ssl=False) as response:
 
                 data = await response.text()
                 assert response.status == 200
+
 
                 return BeautifulSoup(data, "lxml")
 
@@ -95,7 +96,7 @@ async def get_page(session: aiohttp.ClientSession, url):
             print(f'Ошибка подключения к прокси {current_proxy}. Пробуем следующий прокси...')
 
         except Exception as e:
-            logging.error(str(e))
+            logging.error("Проверьте прокси" + str(e))
 
 
 async def get_pagination() -> int:
@@ -156,7 +157,6 @@ def parse_apartments_data(soup: BeautifulSoup):
     try:
         ch = soup.find("div", class_='block-user__name_blank').text.strip()
         if ch == "Объявление устарело":
-            logging.info(f"Обьявление устарело {url}")
             return "Устарело"
     except:
         pass
@@ -339,7 +339,8 @@ async def get_all_data(urls: list[str]):
 
             if data == "Устарело":
                 logging.info("Найдено устаревшее объявление")
-                break
+                logging.info(f"Времени затрачено на все страницы: {time.time() - all_start_time}")
+                return
 
             if data is not None:
                 apart_data.update(data)

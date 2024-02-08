@@ -42,12 +42,17 @@ def parse(name):
         FL = True
         cnt = 0
         while FL:
-            res = json_read("result.json")
-
-            current_proxy = PROXY_LIST[rnd.randint(0, len(PROXY_LIST) - 1)]
+            result = json_read("result.json")
+            if len(PROXY_LIST) < 1:
+                logging.info("Все прокси заблокированы, добавьте новые")
+                FL = False
+                return
+            proxy_num = rnd.randint(0, len(PROXY_LIST) - 1)
+            current_proxy = PROXY_LIST[proxy_num]
 
             proxy = {
-                "https": "http://" + current_proxy
+                "https": "http://" + current_proxy,
+                "http": "http://" + current_proxy
             }
 
             session = requests.session()
@@ -55,23 +60,22 @@ def parse(name):
             res = session.get(
                 url=url,
                 headers=HEADERS,
-
+                proxies=proxy
             )
 
             soup = BeautifulSoup(res.text, "lxml")
 
             phone_token = soup.find(class_="object-page__popup-phone-btns").find('a').get('data-token')
             ID = soup.find(id='vue-app-object').get('data-id')
-            if ID in res.keys():
+            if ID in result.keys():
                 FL = False
+                break
             post_res = session.post(
                 url="https://sverdlovsk.move.ru/ajax/items_v3/get_item_phone",
                 data={"token": phone_token},
                 headers=POST_HEADERS,
                 proxies=proxy
-
             ).json()
-
             if post_res["status"] == 1:
                 row_data = data[ID]
 
@@ -79,13 +83,14 @@ def parse(name):
                 del row_data["url"]
                 logging.info(f"Телефон получен: {post_res['data']['phones']}")
 
-                res.update({ID: row_data})
-                json_save(res, "result")
+                result.update({ID: row_data})
+                json_save(result, "result")
 
                 FL = False
 
             elif cnt == 3:
                 FL = False
+                PROXY_LIST.pop(proxy_num)
                 logging.info("Не удалось получить телефон. Проверьте прокси!")
             else:
                 cnt += 1
@@ -101,6 +106,13 @@ def parse_phones():
     list = os.listdir("raw_json")
 
     for json in list[:1]:
-        parse(json)
+        res = parse(json)
+        if res is None:
+            return
 
     logging.info("Все телефоны получены")
+
+
+logging.basicConfig(level=logging.INFO, filemode="a",
+                    format="%(asctime)s %(levelname)s %(message)s")
+
