@@ -79,7 +79,7 @@ async def get_page(session: aiohttp.ClientSession, url):
 
         rand = rnd.randint(0, len(PROXIES) - 1)
         current_proxy = "http://" + PROXIES[rand]
-        # HEADERS["user-agent"] = ua.random
+        HEADERS["User-Agent"] = ua.random
 
         try:
             async with session.get(url=url, headers=HEADERS,
@@ -99,7 +99,7 @@ async def get_page(session: aiohttp.ClientSession, url):
             print(f'Ошибка подключения к прокси {current_proxy}. Пробуем следующий прокси...')
 
         except Exception as e:
-            logging.error("Проверьте прокси" + str(e))
+            logging.error("Проверьте прокси: " + str(e))
 
 
 async def get_pagination() -> int:
